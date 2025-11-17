@@ -5,53 +5,88 @@ using Azure.Core;
 using Azure.Identity;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace GoodStuff.Functions;
 
-public class HelloWorld(ILogger<HelloWorld> logger)
+public class ProductGatewayFunction(ILogger<ProductGatewayFunction> logger, IConfiguration config)
 {
-    [Function("HelloWorld")]
-    public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
+    private readonly ILogger _logger = logger;
+    private readonly string _apiBaseUrl = config["ProductApi:BaseUrl"] ?? "https://localhost:7003/Product";
+    private readonly string _entraResource = config["ProductApi:EntraResource"] ?? "api://56b1c593-a584-4622-b223-bcf0fb117cb1/.default";
+    private readonly string[] _allowedCategories = (config["ProductApi:AllowedCategories"] ?? "cpu,gpu,cooler,motherboard,ram,psu,case")
+        .Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+    // App config / environment variables
+
+    [Function("ProductGateway")]
+    public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "patch", "delete", Route = "products/{category}")]
+        HttpRequestData req,
+        string category)
     {
-        logger.LogInformation("Function triggered: fetching CPUs from API...");
+        _logger.LogInformation("Function triggered. Category: {Category}, Method: {Method}", category, req.Method);
 
-        // 1️⃣ Get Azure AD token using Managed Identity or local credentials
-        var credential = new DefaultAzureCredential();
+        if (!IsValidCategory(category))
+            return await CreateErrorResponse(req, HttpStatusCode.BadRequest, $"Unknown category '{category}'.");
 
-        var token = await credential.GetTokenAsync(
-            new TokenRequestContext(["api://56b1c593-a584-4622-b223-bcf0fb117cb1/.default"])
-        );
+        var token = await GetAzureAdTokenAsync();
+        var apiUrl = $"{_apiBaseUrl}/{category.ToUpper()}";
 
-        // 2️⃣ Call your API (secured with Entra ID)
-        var apiUrl = "https://localhost:7003/Product/CPU";
-        using var httpClient = new HttpClient();
+        HttpResponseMessage apiResponse;
 
-        httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token.Token);
-
-        var response = await httpClient.GetAsync(apiUrl);
-
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            var error = await response.Content.ReadAsStringAsync();
-            logger.LogError("API call failed with status {StatusCode}: {Error}",
-                response.StatusCode, error);
-
-            var errorRes = req.CreateResponse(response.StatusCode);
-            await errorRes.WriteStringAsync($"API call failed: {error}");
-            return errorRes;
+            apiResponse = await ForwardRequestAsync(req, apiUrl, token);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error forwarding request to API");
+            return await CreateErrorResponse(req, HttpStatusCode.InternalServerError, ex.Message);
         }
 
-        // 3️⃣ Read API response and return JSON to client (Angular)
-        var content = await response.Content.ReadAsStringAsync();
+        return await CreateForwardedResponse(req, apiResponse);
+    }
 
-        var res = req.CreateResponse(HttpStatusCode.OK);
-        res.Headers.Add("Content-Type", "application/json; charset=utf-8");
+    private bool IsValidCategory(string category) =>
+        _allowedCategories.Contains(category.ToLower());
+
+    private async Task<string> GetAzureAdTokenAsync()
+    {
+        var credential = new DefaultAzureCredential();
+        var token = await credential.GetTokenAsync(new TokenRequestContext(new[] { _entraResource }));
+        return token.Token;
+    }
+
+    private async Task<HttpResponseMessage> ForwardRequestAsync(HttpRequestData req, string url, string token)
+    {
+        using var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        return req.Method.ToUpper() switch
+        {
+            "GET" => await httpClient.GetAsync(url),
+            "POST" => await httpClient.PostAsync(url, new StringContent(await req.ReadAsStringAsync(), Encoding.UTF8, "application/json")),
+            "PATCH" => await httpClient.PatchAsync(url, new StringContent(await req.ReadAsStringAsync(), Encoding.UTF8, "application/json")),
+            "DELETE" => await httpClient.DeleteAsync(url),
+            _ => throw new InvalidOperationException($"Unsupported HTTP method {req.Method}")
+        };
+    }
+
+    private async Task<HttpResponseData> CreateForwardedResponse(HttpRequestData req, HttpResponseMessage apiResponse)
+    {
+        var content = await apiResponse.Content.ReadAsStringAsync();
+        var res = req.CreateResponse(apiResponse.StatusCode);
+
+        res.Headers.Add("Content-Type", apiResponse.Content.Headers.ContentType?.ToString() ?? "application/json; charset=utf-8");
         await res.WriteStringAsync(content, Encoding.UTF8);
+        return res;
+    }
 
-        logger.LogInformation("Returning CPU data successfully.");
+    private async Task<HttpResponseData> CreateErrorResponse(HttpRequestData req, HttpStatusCode status, string message)
+    {
+        var res = req.CreateResponse(status);
+        await res.WriteStringAsync(message);
         return res;
     }
 }
