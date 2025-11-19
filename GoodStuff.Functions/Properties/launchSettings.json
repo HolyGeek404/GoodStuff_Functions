@@ -3,9 +3,7 @@
     "GoodStuff.Functions": {
       "commandName": "Project",
       "commandLineArgs": "--port 7257",
-      "launchBrowser": false,
-      "AZURE_TENANT_ID": "e7b4669a-95b7-468d-8c55-4ba35609e82b",
-      "AZURE_CLIENT_ID": "faa1e6c8-6c66-4dd8-90a4-81c61feaefac"
+      "launchBrowser": false
     }
   }
 }
