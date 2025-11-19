@@ -1,27 +1,19 @@
-using System.Net;
-using GoodStuff.Functions.Models;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace GoodStuff.Functions.Services;
 
 public class FunctionService(
-     IOptions<Dictionary<string, ApiRoute>> routes,
+     IValidatorService validatorService,
      IHttpClientFactory httpClientFactory,
      ILogger<FunctionService> logger,
      IHttpRequestMessageProvider httpRequestMessageProvider) : IFunctionService
 {
      public async Task<HttpResponseMessage> HandleRequest(HttpRequestData request, string api)
      {
-          var apiRoute = routes.Value.FirstOrDefault(x => x.Key == api).Value;
-          if (apiRoute == null)
-          {
-               throw new ArgumentException($"Route {api} not found");
-          }
-
           try
           {
+               var apiRoute = validatorService.ValidateApi(api);
                var httpClient = httpClientFactory.CreateClient( apiRoute.BaseUrl);
                var message = await httpRequestMessageProvider.GetHttpRequestMessage(request, apiRoute);
                var response = await httpClient.SendAsync(message);

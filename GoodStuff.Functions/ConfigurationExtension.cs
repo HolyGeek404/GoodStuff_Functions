@@ -10,6 +10,7 @@ public static class ConfigurationExtension
         services.AddScoped<IFunctionService, FunctionService>();
         services.AddScoped<IHttpRequestMessageProvider, HttpRequestMessageProvider>();
         services.AddScoped<ITokenProviderService, TokenProviderService>();
+        services.AddScoped<IValidatorService, ValidatorService>();
         
         return services;
     }

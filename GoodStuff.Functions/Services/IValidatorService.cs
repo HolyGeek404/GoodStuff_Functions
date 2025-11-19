@@ -1,0 +1,8 @@
+using GoodStuff.Functions.Models;
+
+namespace GoodStuff.Functions.Services;
+
+public interface IValidatorService
+{
+    ApiRoute ValidateApi(string api);
+}

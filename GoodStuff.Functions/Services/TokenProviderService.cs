@@ -11,7 +11,7 @@ public class TokenProviderService(IConfiguration configuration) : ITokenProvider
         var tenantId = azure["TenantId"];
         var clientId = azure["ClientId"];
         var clientSecret = azure["ClientSecret"];
-        var instanceUrl = azure["InstanceUrl"];
+        var instanceUrl = azure["Instance"];
         var authority = $"{instanceUrl}{tenantId}";
 
         var app = ConfidentialClientApplicationBuilder.Create(clientId)
