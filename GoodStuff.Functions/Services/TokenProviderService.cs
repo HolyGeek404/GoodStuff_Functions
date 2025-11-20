@@ -1,3 +1,4 @@
+using GoodStuff.Functions.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 

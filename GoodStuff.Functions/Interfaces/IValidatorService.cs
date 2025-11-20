@@ -1,6 +1,6 @@
 using GoodStuff.Functions.Models;
 
-namespace GoodStuff.Functions.Services;
+namespace GoodStuff.Functions.Interfaces;
 
 public interface IValidatorService
 {

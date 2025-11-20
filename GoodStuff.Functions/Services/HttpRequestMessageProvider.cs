@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using GoodStuff.Functions.Interfaces;
 using GoodStuff.Functions.Models;
 using Microsoft.Azure.Functions.Worker.Http;
 
@@ -7,12 +8,13 @@ namespace GoodStuff.Functions.Services;
 public class HttpRequestMessageProvider(
     ITokenProviderService tokenProvider) : IHttpRequestMessageProvider
 {
-    public async Task<HttpRequestMessage> GetHttpRequestMessage(HttpRequestData request, ApiRoute apiRoute)
+    public async Task<HttpRequestMessage> GetHttpRequestMessage(HttpRequestData request, ApiRoute apiRoute,
+        string endpoint)
     {
         var method = GetHttpMethod(request);
-        var message = new HttpRequestMessage(method, apiRoute.BaseUrl);
+        var message = new HttpRequestMessage(method, $"{apiRoute.BaseUrl}{endpoint}");
         await SetAuthenticationHeader(message, apiRoute);
-         
+
         return message;
     }
 

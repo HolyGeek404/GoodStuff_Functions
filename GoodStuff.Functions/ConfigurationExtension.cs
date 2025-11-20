@@ -1,3 +1,4 @@
+using GoodStuff.Functions.Interfaces;
 using GoodStuff.Functions.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,7 +12,7 @@ public static class ConfigurationExtension
         services.AddScoped<IHttpRequestMessageProvider, HttpRequestMessageProvider>();
         services.AddScoped<ITokenProviderService, TokenProviderService>();
         services.AddScoped<IValidatorService, ValidatorService>();
-        
+
         return services;
     }
 }

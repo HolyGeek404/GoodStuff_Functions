@@ -1,3 +1,4 @@
+using GoodStuff.Functions.Interfaces;
 using GoodStuff.Functions.Models;
 using Microsoft.Extensions.Configuration;
 
