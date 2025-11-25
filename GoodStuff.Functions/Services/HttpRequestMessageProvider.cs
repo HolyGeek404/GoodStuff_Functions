@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using System.Text;
 using GoodStuff.Functions.Interfaces;
 using GoodStuff.Functions.Models;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -13,12 +14,20 @@ public class HttpRequestMessageProvider(
     {
         var method = GetHttpMethod(request);
         var message = new HttpRequestMessage(method, $"{apiRoute.BaseUrl}{endpoint}");
+        await TrySetBody(message, request);
         await SetAuthenticationHeader(message, apiRoute);
 
         return message;
     }
 
-    private HttpMethod GetHttpMethod(HttpRequestData request)
+    private static async Task TrySetBody(HttpRequestMessage message, HttpRequestData request)
+    {
+       var content = await request.ReadAsStringAsync();
+       if (!string.IsNullOrWhiteSpace(content))
+        message.Content = new StringContent(content, Encoding.UTF8, "application/json");
+    }
+
+    private static HttpMethod GetHttpMethod(HttpRequestData request)
     {
         return request.Method switch
         {
