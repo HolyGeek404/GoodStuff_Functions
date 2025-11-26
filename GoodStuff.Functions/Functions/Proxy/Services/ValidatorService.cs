@@ -2,7 +2,7 @@ using GoodStuff.Functions.Interfaces;
 using GoodStuff.Functions.Models;
 using Microsoft.Extensions.Configuration;
 
-namespace GoodStuff.Functions.Services;
+namespace GoodStuff.Functions.Functions.Proxy.Services;
 
 public class ValidatorService(IConfiguration configuration) : IValidatorService
 {

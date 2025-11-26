@@ -3,12 +3,12 @@ using GoodStuff.Functions.Interfaces;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 
-namespace GoodStuff.Functions.Services;
+namespace GoodStuff.Functions.Functions.Proxy.Services;
 
-public class FunctionService(
+public class ProxyService(
     IValidatorService validatorService,
     IHttpClientFactory httpClientFactory,
-    ILogger<FunctionService> logger,
+    ILogger<ProxyService> logger,
     IHttpRequestMessageProvider httpRequestMessageProvider) : IFunctionService
 {
     public async Task<HttpResponseMessage> ProcessRequest(HttpRequestData request, string api, string endpoint)

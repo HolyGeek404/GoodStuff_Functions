@@ -4,9 +4,9 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 
-namespace GoodStuff.Functions;
+namespace GoodStuff.Functions.Functions.Proxy;
 
-public class Main(ILogger<Main> logger, IFunctionService functionService)
+public class ProxyFunction(ILogger<ProxyFunction> logger, IFunctionService functionService)
 {
     [Function("ApiGateway")]
     public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, 

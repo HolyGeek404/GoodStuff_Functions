@@ -2,7 +2,7 @@ using GoodStuff.Functions.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 
-namespace GoodStuff.Functions.Services;
+namespace GoodStuff.Functions.Shared;
 
 public class TokenProviderService(IConfiguration configuration) : ITokenProviderService
 {

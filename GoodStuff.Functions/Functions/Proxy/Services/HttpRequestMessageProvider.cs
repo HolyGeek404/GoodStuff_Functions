@@ -4,7 +4,7 @@ using GoodStuff.Functions.Interfaces;
 using GoodStuff.Functions.Models;
 using Microsoft.Azure.Functions.Worker.Http;
 
-namespace GoodStuff.Functions.Services;
+namespace GoodStuff.Functions.Functions.Proxy.Services;
 
 public class HttpRequestMessageProvider(
     ITokenProviderService tokenProvider) : IHttpRequestMessageProvider
