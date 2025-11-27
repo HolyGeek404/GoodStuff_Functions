@@ -1,5 +1,4 @@
 using Azure.Identity;
-using GoodStuff.Functions;
 using GoodStuff.Functions.Configuration;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;
@@ -15,6 +14,7 @@ builder.ConfigureFunctionsWebApplication().Configuration
 
 var azureAd = builder.Configuration.GetSection("AzureAd");
 builder.Configuration.AddAzureKeyVault(new Uri(azureAd["KvUrl"]), new DefaultAzureCredential());
+
 builder.Services.AddLogging(loggingBuilder =>
     loggingBuilder.AddSerilog(new LoggerConfiguration().WriteTo.Console().CreateLogger()));
 

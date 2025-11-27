@@ -6,9 +6,9 @@ using Microsoft.Extensions.Logging;
 
 namespace GoodStuff.Functions.Functions.Proxy;
 
-public class ProxyFunction(ILogger<ProxyFunction> logger, IFunctionService functionService)
+public class ProxyFunction(ILogger<ProxyFunction> logger, IFunctionService service)
 {
-    [Function("ApiGateway")]
+    [Function("Proxy")]
     public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, 
                 "GET", "POST", "PATCH", "DELETE", Route = "proxy/{api}/{endpoint}")]
         HttpRequestData req,
@@ -19,8 +19,8 @@ public class ProxyFunction(ILogger<ProxyFunction> logger, IFunctionService funct
 
         try
         {
-            var result = await functionService.ProcessRequest(req, api, endpoint);
-            var response = await functionService.HandleResponse(result, req);
+            var result = await service.ProcessRequest(req, api, endpoint);
+            var response = await service.HandleResponse(result, req);
             
             logger.LogInformation("Function finished successfully . API: {Api}, Method: {Method}, Endpoint: {Endpoint}", api, req.Method, endpoint);
             

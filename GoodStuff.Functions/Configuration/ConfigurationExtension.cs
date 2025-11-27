@@ -1,3 +1,4 @@
+using GoodStuff.Functions.Functions.EmailNotification.Services;
 using GoodStuff.Functions.Functions.Proxy.Services;
 using GoodStuff.Functions.Interfaces;
 using GoodStuff.Functions.Shared;
@@ -13,6 +14,8 @@ public static class ConfigurationExtension
         services.AddScoped<IHttpRequestMessageProvider, HttpRequestMessageProvider>();
         services.AddScoped<ITokenProviderService, TokenProviderService>();
         services.AddScoped<IValidatorService, ValidatorService>();
+        services.AddScoped<IEmailNotificationService, EmailNotificationService>();
+        services.AddScoped<IEmailService, EmailService>();
 
         return services;
     }
