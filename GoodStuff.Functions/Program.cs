@@ -1,5 +1,4 @@
 using Azure.Identity;
-using GoodStuff.Functions;
 using GoodStuff.Functions.Configuration;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;

@@ -1,4 +1,4 @@
-using GoodStuff.Functions.Functions.EmailNotification.Services;
+using GoodStuff.Functions.Interfaces;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 
@@ -8,10 +8,10 @@ public class EmailNotificationFunction(IEmailNotificationService service)
 {
     [Function("EmailNotification")]
 
-    public bool Run([HttpTrigger(AuthorizationLevel.Anonymous,
-            "GET", Route = "notification")] HttpRequestData req)
+    public async Task<bool> Run([HttpTrigger(AuthorizationLevel.Anonymous,
+            "POST", Route = "notification/{type}")] HttpRequestData req, string type)
     {
-        service.ProcessRequest();
+        await service.ProcessRequest(req, type);
         return true;
     }
     
