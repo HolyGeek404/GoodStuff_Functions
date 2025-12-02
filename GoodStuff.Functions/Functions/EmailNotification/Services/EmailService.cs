@@ -23,7 +23,7 @@ public class EmailService(IConfiguration config) : IEmailService
         var message = new MailMessage(fromAddress, "wiktorzme@gmail.com"); // for easier testing
         message.Subject = "GoodStuff - Weryfikacja konta.";
         message.Body = "Witaj, w celu aktywacji swojego konta, wejdz w ten link: " +
-                       $"https://localhost:5001/AccountVerification/?userEmail={userEmail}&key={key}";
+                       $"https://localhost:4200/AccountVerification/?userEmail={userEmail}&key={key}";
         await smtpClient.SendMailAsync(message);
     }
 }
